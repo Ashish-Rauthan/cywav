@@ -11,7 +11,6 @@ import Flights from "./Pages/Flights";
 import FlightResults from "./Pages/FlightResults";
 import Cab from "./Pages/Cab";
 import Bus from "./Pages/Bus";
-import HomestayVillaPage from "./Pages/HomestayVillaPage";
 import TrainPage from "./Pages/TrainPage";
 import ComingSoonPage from "./Pages/ComingSoonPage";
 
@@ -35,7 +34,6 @@ function App() {
        <Route path="/flights/results" element={<FlightResults/>} />
        <Route path="/cabs" element={<Cab/>} />
        <Route path="/buses" element={<Bus/>} />
-       <Route path="/homestays" element={<HomestayVillaPage/>} />
        <Route path="/trains" element={<TrainPage/>} />
        <Route path="/soon" element={<ComingSoonPage/>}/>
 
