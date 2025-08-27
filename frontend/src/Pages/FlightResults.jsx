@@ -186,7 +186,7 @@ export default function FlightResults() {
     // Check each date for available flights
     for (const date of datesToCheck) {
       try {
-        const res = await axios.get('http://localhost:5000/api/flights/search', {
+        const res = await axios.get('https://cywav.onrender.com/api/flights/search', {
           params: {
             origin: origin,
             destination: destination,
@@ -232,7 +232,7 @@ export default function FlightResults() {
     setAlternativeDateSuggestions([]);
 
     try {
-      const res = await axios.get('http://localhost:5000/api/flights/search', {
+      const res = await axios.get('https://cywav.onrender.com/api/flights/search', {
         params: {
           origin: currentOriginCode,
           destination: currentDestinationCode,
