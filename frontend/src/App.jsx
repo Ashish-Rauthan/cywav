@@ -6,6 +6,7 @@ import Home from "./Pages/Home";
 import './index.css'
 import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
+import ScrollToTop from "./Components/ScrollToTop";
 import Hotels from "./Pages/Hotels";
 import Flights from "./Pages/Flights";
 import FlightResults from "./Pages/FlightResults";
@@ -24,7 +25,7 @@ function App() {
     <Router>
       
       <Navbar/>
-      
+      <ScrollToTop /> 
       <Routes>
        
        <Route path="/signup" element={<SignupForm/>} />
