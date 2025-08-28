@@ -1,13 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
-import heroImage from '../assets/download.jpeg';
-import { FaPlaneDeparture,FaPlaneArrival } from 'react-icons/fa';
+import heroImage from '../assets/download.png'; // Ensure this is the correct high-quality hero image
+
+// --- ICONS (Matching the previous component's style) ---
+import { FaPlaneDeparture, FaPlaneArrival } from 'react-icons/fa';
+import { IoCalendarOutline, IoSearch } from 'react-icons/io5';
+
 
 // --- Helper Components ---
 
 const InputIcon = ({ children }) => (
-  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
     {children}
   </div>
 );
@@ -48,10 +52,11 @@ const AIRLINE_NAMES = {
 };
 
 export default function FlightResults() {
-    // Scroll to top on mount
+  // Scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+  
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -80,21 +85,78 @@ export default function FlightResults() {
 
   const originTimer = useRef(null);
   const destinationTimer = useRef(null);
+  
+  // Use useCallback to memoize searchFlights function
+  const searchFlights = useCallback(async (
+    currentOriginCode,
+    currentDestinationCode,
+    currentDepartDate,
+  ) => {
+    if (!currentOriginCode || !currentDestinationCode || !currentDepartDate) {
+      setError('Please fill in Origin, Destination, and Departure Date.');
+      setResults([]);
+      return;
+    }
 
+    setLoading(true);
+    setResults([]);
+    setError('');
+    setAlternativeDateSuggestions([]);
+
+    try {
+      const res = await axios.get('https://cywav.onrender.com/api/flights/search', {
+        params: {
+          origin: currentOriginCode,
+          destination: currentDestinationCode,
+          depart_date: currentDepartDate,
+          one_way: true,
+        },
+      });
+
+      if (res.data.data?.length > 0) {
+        setResults(res.data.data);
+      } else {
+        setError('No flights found for the selected route and dates.');
+        searchAlternativeDates(currentOriginCode, currentDestinationCode, currentDepartDate);
+      }
+    } catch (err) {
+      console.error(err);
+      setError('An error occurred while fetching flight data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, []); // Empty dependency array means this function is only created once
+
+  // New useEffect to handle URL parameters on load and refresh
   useEffect(() => {
-    if (location.state) {
-      const { origin, destination, depart_date, originInput: initialOriginInput, destinationInput: initialDestinationInput } = location.state;
-      setOriginCode(origin || '');
-      setDestinationCode(destination || '');
-      setDepartDate(depart_date || '');
-      setOriginInput(initialOriginInput || '');
-      setDestinationInput(initialDestinationInput || '');
+    const params = new URLSearchParams(location.search);
+    const origin = params.get('origin');
+    const destination = params.get('destination');
+    const depart_date = params.get('depart_date');
+    const originInput = params.get('origin_input');
+    const destinationInput = params.get('destination_input');
 
-      if (origin && destination && depart_date) {
-        searchFlights(origin, destination, depart_date);
+    if (origin && destination && depart_date && originInput && destinationInput) {
+      setOriginCode(origin);
+      setDestinationCode(destination);
+      setDepartDate(depart_date);
+      setOriginInput(originInput);
+      setDestinationInput(destinationInput);
+      searchFlights(origin, destination, depart_date);
+    } else if (location.state) {
+      // Fallback to location.state for initial navigation (from Home page)
+      const { origin: stateOrigin, destination: stateDestination, depart_date: stateDepartDate, originInput: stateOriginInput, destinationInput: stateDestinationInput } = location.state;
+      setOriginCode(stateOrigin || '');
+      setDestinationCode(stateDestination || '');
+      setDepartDate(stateDepartDate || '');
+      setOriginInput(stateOriginInput || '');
+      setDestinationInput(stateDestinationInput || '');
+
+      if (stateOrigin && stateDestination && stateDepartDate) {
+        searchFlights(stateOrigin, stateDestination, stateDepartDate);
       }
     }
-  }, [location.state]);
+  }, [location.search, location.state, searchFlights]);
 
   const fetchCitySuggestions = async (input, setSuggestions) => {
     if (input.length < 2) {
@@ -194,43 +256,13 @@ export default function FlightResults() {
     setAlternativeDateSuggestions(availableDates);
     setSearchingAlternativeDates(false);
   };
-
-  const searchFlights = async (
-    currentOriginCode = originCode,
-    currentDestinationCode = destinationCode,
-    currentDepartDate = departDate,
-  ) => {
-    if (!currentOriginCode || !currentDestinationCode || !currentDepartDate) {
-      setError('Please fill in Origin, Destination, and Departure Date.');
-      return;
-    }
-
-    setLoading(true);
-    setResults([]);
-    setError('');
-    setAlternativeDateSuggestions([]);
-
-    try {
-      const res = await axios.get('https://cywav.onrender.com/api/flights/search', {
-        params: {
-          origin: currentOriginCode,
-          destination: currentDestinationCode,
-          depart_date: currentDepartDate,
-          one_way: true,
-        },
-      });
-
-      if (res.data.data?.length > 0) {
-        setResults(res.data.data);
-      } else {
-        setError('No flights found for the selected route and dates.');
-        searchAlternativeDates(currentOriginCode, currentDestinationCode, currentDepartDate);
-      }
-    } catch (err) {
-      console.error(err);
-      setError('An error occurred while fetching flight data. Please try again.');
-    } finally {
-      setLoading(false);
+  
+  const handleMainSearch = () => {
+    if (originCode && destinationCode && departDate) {
+      // Update URL with new search parameters
+      navigate(`?origin=${originCode}&destination=${destinationCode}&depart_date=${departDate}&origin_input=${encodeURIComponent(originInput)}&destination_input=${encodeURIComponent(destinationInput)}`);
+    } else {
+      setError('Please fill in all search fields.');
     }
   };
 
@@ -284,93 +316,110 @@ export default function FlightResults() {
   };
 
   const useAlternativeDate = (date) => {
-    setDepartDate(date);
-    searchFlights(originCode, destinationCode, date);
+    // Update URL to trigger new search
+    navigate(`?origin=${originCode}&destination=${destinationCode}&depart_date=${date}&origin_input=${encodeURIComponent(originInput)}&destination_input=${encodeURIComponent(destinationInput)}`);
   };
 
   return (
     <div className="min-h-screen bg-slate-100">
-      {/* Search Panel with Image Background */}
-      <div className="relative overflow-hidden pt-20 pb-8 mb-8">
-        {/* Background Image Container */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${heroImage})` }}></div>
-          <div className="absolute inset-0 bg-black opacity-40"></div>
-        </div>
-
-        {/* Content Container (Title and Form) */}
-        <div className="relative z-10 text-white px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto text-center mb-10">
-            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
-              Find And Book A Great Experience
+      {/* === UPDATED SEARCH PANEL SECTION WITH MOBILE ADJUSTMENTS === */}
+      <div
+        className="bg-cover bg-no-repeat bg-[75%_top] md:bg-center pt-20 pb-12 md:py-16 mb-8" // Adjusted vertical padding for mobile
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, rgba(255, 255, 255, 0.95) 20%, rgba(255, 255, 255, 0) 70%),
+            url(${heroImage})
+          `
+        }}
+      >
+        <div className="container mx-auto px-4">
+          <div className="max-w-xl">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4 leading-tight"> {/* Adjusted heading size for mobile */}
+              Find Your Next Flight
             </h1>
-          </div>
+            <p className="text-md md:text-lg text-gray-700 mb-6"> {/* Adjusted subtitle size for mobile */}
+              Modify your travel details to find the perfect flight.
+            </p>
 
-          <div className="bg-white/70  p-6 rounded-2xl shadow-lg border border-white/30 max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold mb-2 text-slate-900">Find Your Next Flight</h2>
-            <p className="text-slate-600 mb-6">Enter your travel details to begin.</p>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+                {/* From */}
+                <div className="relative">
+                  <InputIcon><FaPlaneDeparture /></InputIcon>
+                  <input
+                    type="text"
+                    placeholder="From"
+                    value={originInput}
+                    onChange={(e) => setOriginInput(e.target.value)}
+                    className="w-half bg-transparent border-b-2 border-gray-700 pl-10 pr-3 py-2.5 focus:outline-none focus:border-blue-500 transition duration-300"
+                  />
+                  {originSuggestions.length > 0 && (
+                    <ul className="absolute bg-white text-black border w-half mt-1 max-h-48 overflow-y-auto z-20 shadow-lg rounded-md">
+                      {originSuggestions.map((city, i) => (
+                        <li key={i} className="p-2 hover:bg-blue-50 cursor-pointer" onClick={() => selectOrigin(city)}>
+                          {city.name}, {city.country_name} ({city.code})
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                {/* To */}
+                <div className="relative">
+                  <InputIcon><FaPlaneArrival /></InputIcon>
+                  <input
+                    type="text"
+                    placeholder="To"
+                    value={destinationInput}
+                    onChange={(e) => setDestinationInput(e.target.value)}
+                    className="w-half bg-transparent border-b-2 border-gray-700 pl-10 pr-3 py-2.5 focus:outline-none focus:border-blue-500 transition duration-300"
+                  />
+                  {destinationSuggestions.length > 0 && (
+                    <ul className="absolute bg-white text-black border w-half mt-1 max-h-48 overflow-y-auto z-20 shadow-lg rounded-md">
+                      {destinationSuggestions.map((city, i) => (
+                        <li key={i} className="p-2 hover:bg-blue-50 cursor-pointer" onClick={() => selectDestination(city)}>
+                          {city.name}, {city.country_name} ({city.code})
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-              {/* From */}
-              <div className="relative">
-                <InputIcon>
-                 <FaPlaneDeparture className='text-black'/>
-                </InputIcon>
-                <input type="text" placeholder="From" value={originInput} onChange={(e) => setOriginInput(e.target.value)} className="w-full text-black bg-white border-slate-300 pl-10 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
-                {suggestionLoading && originSuggestions.length === 0 && <div className="absolute right-4 top-2.5 text-gray-400 animate-spin">⏳</div>}
-                {originSuggestions.length > 0 && (
-                  <ul className="absolute bg-white text-black border w-full mt-1 max-h-48 overflow-y-auto z-20 shadow-lg rounded-md">
-                    {originSuggestions.map((city, i) => (
-                      <li key={i} className="p-2  hover:bg-blue-50 cursor-pointer" onClick={() => selectOrigin(city)}>
-                        {city.name}, {city.country_name} ({city.code})
-                      </li>
-                    ))}
-                  </ul>
-                )}
+              <div className="flex items-center gap-4 pt-2">
+                <div className="relative flex-grow">
+                  <InputIcon><IoCalendarOutline /></InputIcon>
+                  <input
+                    type="date"
+                    value={departDate}
+                    onChange={(e) => setDepartDate(e.target.value)}
+                    className={`w-full appearance-none bg-transparent border-b-2 border-gray-700 pl-10 pr-3 py-2.5 focus:outline-none focus:border-blue-500 transition duration-300 ${
+                      departDate ? 'text-gray-800' : 'text-gray-500'
+                    }`}
+                  />
+                </div>
+                <button
+                  onClick={handleMainSearch}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 md:px-6 md:py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2 font-semibold" // Adjusted button padding for mobile
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                      <span className="hidden sm:inline">Searching...</span>
+                    </>
+                  ) : (
+                    <>
+                      <IoSearch size={20} />
+                      <span className="hidden sm:inline">Search Flights</span>
+                    </>
+                  )}
+                </button>
               </div>
-              {/* To */}
-              <div className="relative">
-                <InputIcon>
-                 <FaPlaneArrival className='text-black'/>
-                </InputIcon>
-                <input type="text" placeholder="To" value={destinationInput} onChange={(e) => setDestinationInput(e.target.value)} className="w-full text-black bg-white border-slate-300 pl-10 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
-                {suggestionLoading && destinationSuggestions.length === 0 && <div className="absolute right-4 top-2.5 text-black animate-spin">⏳</div>}
-                {destinationSuggestions.length > 0 && (
-                  <ul className="absolute bg-white text-black border w-full mt-1 max-h-48 overflow-y-auto z-20 shadow-lg rounded-md">
-                    {destinationSuggestions.map((city, i) => (
-                      <li key={i} className="p-2 hover:bg-blue-50 cursor-pointer" onClick={() => selectDestination(city)}>
-                        {city.name}, {city.country_name} ({city.code})
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-              {/* Depart Date */}
-              <div className="relative">
-                <InputIcon><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></InputIcon>
-                <input type="date" value={departDate} onChange={(e) => setDepartDate(e.target.value)} className="w-full text-black bg-white border-slate-300 pl-10 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-end gap-4">
-              <button onClick={() => searchFlights()} className="w-full sm:w-auto text-white px-8 py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2 font-semibold" style={{ backgroundColor: 'oklch(54.6% 0.245 262.881)' }} disabled={loading}>
-                {loading ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    Searching...
-                  </>
-                ) : (
-                  <>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                    Search Flights
-                  </>
-                )}
-              </button>
             </div>
           </div>
         </div>
       </div>
-
+      
       {/* Main content area below the search form */}
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         <style>{`
@@ -385,7 +434,7 @@ export default function FlightResults() {
         <h1 className="text-4xl font-bold mb-2 text-slate-800">Flight Results</h1>
         {(originInput && destinationInput && departDate) && (
           <p className="text-slate-600 mb-6">
-            Flights from <span className="font-semibold">{originInput}</span> to <span className="font-semibold">{destinationInput}</span> on <span className="font-semibold">{departDate}</span>
+            Flights from <span className="font-semibold">{originInput}</span> to <span className="font-semibold">{destinationInput}</span> on <span className="font-semibold">{new Date(departDate).toLocaleDateString('en-GB')}</span>
           </p>
         )}
         <div className="lg:hidden mb-4">
@@ -418,8 +467,7 @@ export default function FlightResults() {
                       <p className="text-lg font-bold text-blue-600 mt-2">From ₹{suggestion.price}</p>
                       <button
                         onClick={() => useAlternativeDate(suggestion.date)}
-                        className="mt-3 w-full text-white py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                        style={{ backgroundColor: 'oklch(54.6% 0.245 262.881)' }}
+                        className="mt-3 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                       >
                         Select This Date
                       </button>
@@ -456,7 +504,7 @@ export default function FlightResults() {
                 </div>
                 {/* Price Range */}
                 <div>
-                  <label className="block text-slate-700 font-medium mb-2">Price Range ($)</label>
+                  <label className="block text-slate-700 font-medium mb-2">Price Range (₹)</label>
                   <div className="flex gap-3">
                     <input
                       type="number"
@@ -495,9 +543,9 @@ export default function FlightResults() {
                 <div>
                   <label className="block text-slate-700 font-medium mb-2">Sort By</label>
                   <div className="flex flex-wrap gap-2">
-                    <button onClick={() => toggleSortOrder('price')} className={`px-4 py-2 text-sm rounded-md transition-colors font-semibold ${sortBy === 'price' ? 'text-white shadow-md' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`} style={{ backgroundColor: sortBy === 'price' ? 'oklch(54.6% 0.245 262.881)' : '' }}>Price {getSortIndicator('price')}</button>
-                    <button onClick={() => toggleSortOrder('departure')} className={`px-4 py-2 text-sm rounded-md transition-colors font-semibold ${sortBy === 'departure' ? 'text-white shadow-md' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`} style={{ backgroundColor: sortBy === 'departure' ? 'oklch(54.6% 0.245 262.881)' : '' }}>Departure {getSortIndicator('departure')}</button>
-                    <button onClick={() => toggleSortOrder('duration')} className={`px-4 py-2 text-sm rounded-md transition-colors font-semibold ${sortBy === 'duration' ? 'text-white shadow-md' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`} style={{ backgroundColor: sortBy === 'duration' ? 'oklch(54.6% 0.245 262.881)' : '' }}>Duration {getSortIndicator('duration')}</button>
+                    <button onClick={() => toggleSortOrder('price')} className={`px-4 py-2 text-sm rounded-md transition-colors font-semibold ${sortBy === 'price' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`}>Price {getSortIndicator('price')}</button>
+                    <button onClick={() => toggleSortOrder('departure')} className={`px-4 py-2 text-sm rounded-md transition-colors font-semibold ${sortBy === 'departure' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`}>Departure {getSortIndicator('departure')}</button>
+                    <button onClick={() => toggleSortOrder('duration')} className={`px-4 py-2 text-sm rounded-md transition-colors font-semibold ${sortBy === 'duration' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`}>Duration {getSortIndicator('duration')}</button>
                   </div>
                 </div>
               </div>
@@ -570,8 +618,7 @@ export default function FlightResults() {
                         href={`https://www.aviasales.com${flight.link}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full sm:w-auto md:w-full text-white px-4 py-3 rounded-lg hover:bg-green-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 font-semibold text-base"
-                        style={{ backgroundColor: 'oklch(54.6% 0.245 262.881)' }}
+                        className="w-full sm:w-auto md:w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 font-semibold text-base"
                       >
                         Book Now
                       </a>
