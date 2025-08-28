@@ -8,7 +8,7 @@ import image3 from '../../assets/3.jpg';
 import image4 from '../../assets/4.jpg';
 import image5 from '../../assets/5.jpg';
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_BASE || "https://cywav.onrender.com";
 
 // === useMediaQuery Hook ===
 const useMediaQuery = (query) => {

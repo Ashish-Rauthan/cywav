@@ -1,1 +1,21 @@
 @import "tailwindcss";
+/* Add padding to the top of the body for mobile to account for fixed header */
+body {
+  padding-top: 4rem; /* Adjust based on your mobile header height */
+}
+
+@media (min-width: 1024px) {
+  body {
+    padding-top: 0;
+  }
+}
+
+/* Ensure content doesn't overflow horizontally */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
