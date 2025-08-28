@@ -39,9 +39,10 @@ const Sidebar = ({
         <div className="flex flex-col p-4">
           <div className="flex items-center justify-between py-4 border-b">
             <div className="flex items-center space-x-2">
+              {/* Hide collapse button on mobile */}
               <button
                 onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                className="p-2 rounded-full hover:bg-gray-200"
+                className="hidden lg:flex p-2 rounded-full hover:bg-gray-200"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -107,9 +108,9 @@ const Sidebar = ({
 const Navbar = ({ isSidebarCollapsed, setIsSidebarCollapsed }) => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("");
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [isMobileMenuHidden, setIsMobileMenuHidden] = useState(false);
   const mainNavRef = useRef(null);
   const [mainNavHeight, setMainNavHeight] = useState(0);
   
@@ -131,10 +132,10 @@ const Navbar = ({ isSidebarCollapsed, setIsSidebarCollapsed }) => {
     { name: "Forex", icon: "💵", path: "/soon" },
     { name: "Insurance", icon: "🛡️", path: "/soon" },
   ];
-
+  
   // Mobile top bar items
   const mobileNavItems = navItems.slice(0, 3);
-
+  
   useEffect(() => {
     const currentPath = location.pathname;
     const currentItem = navItems.find((item) => item.path === currentPath);
@@ -143,7 +144,7 @@ const Navbar = ({ isSidebarCollapsed, setIsSidebarCollapsed }) => {
     }
     setIsSidebarOpen(false);
   }, [location.pathname]);
-
+  
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1024);
@@ -152,8 +153,14 @@ const Navbar = ({ isSidebarCollapsed, setIsSidebarCollapsed }) => {
       }
     };
     
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    const handleScroll = () => {
+      // For mobile, hide only the 3 menu items when scrolled
+      if (isMobile) {
+        setIsMobileMenuHidden(window.scrollY > 50);
+      }
+    };
     
+    // Initial height measurement
     if (mainNavRef.current) {
       setMainNavHeight(mainNavRef.current.offsetHeight);
     }
@@ -165,10 +172,8 @@ const Navbar = ({ isSidebarCollapsed, setIsSidebarCollapsed }) => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
-
-  const shouldBeFixed = !isMobile && isScrolled;
-
+  }, [isMobile]);
+  
   return (
     <>
       <style>
@@ -183,7 +188,7 @@ const Navbar = ({ isSidebarCollapsed, setIsSidebarCollapsed }) => {
         `}
       </style>
       
-      {/* Mobile Top Bar */}
+      {/* Mobile Top Bar - Always visible */}
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-white shadow-md z-50 p-4 flex justify-between items-center">
         <button
           onClick={() => setIsSidebarOpen(true)}
@@ -213,9 +218,13 @@ const Navbar = ({ isSidebarCollapsed, setIsSidebarCollapsed }) => {
           Sign in
         </button>
       </div>
-
-      {/* Mobile Navigation Items (only 3 items) */}
-      <div className="lg:hidden fixed top-16 left-0 right-0 bg-white shadow-md z-40 p-2 flex justify-around">
+      
+      {/* Mobile Navigation Items (only 3 items) - Hide when scrolled */}
+      <div 
+        className={`lg:hidden fixed top-16 left-0 right-0 bg-white shadow-md z-40 p-2 flex justify-around transition-transform duration-300 ${
+          isMobileMenuHidden ? '-translate-y-full' : 'translate-y-0'
+        }`}
+      >
         {mobileNavItems.map((item) => (
           <Link
             key={item.name}
@@ -243,14 +252,13 @@ const Navbar = ({ isSidebarCollapsed, setIsSidebarCollapsed }) => {
         setActiveTab={setActiveTab}
       />
       
-      <div style={{ height: shouldBeFixed ? mainNavHeight : 0 }} />
+      {/* Spacer for fixed desktop navbar */}
+      <div className="hidden lg:block" style={{ height: `${mainNavHeight}px` }} />
       
-      {/* Desktop Top Bar */}
+      {/* Desktop Top Bar - Always fixed */}
       <div
         ref={mainNavRef}
-        className={`hidden lg:flex w-full justify-between items-center bg-white shadow-md transition-all duration-300 ease-in-out z-50 py-3 px-6 ${
-          shouldBeFixed ? "fixed top-0 left-0" : "relative"
-        }`}
+        className="hidden lg:flex fixed top-0 left-0 right-0 w-full justify-between items-center bg-white shadow-md transition-all duration-300 ease-in-out z-50 py-3 px-6"
       >
         <div className="flex items-center space-x-6">
           <button
@@ -259,7 +267,7 @@ const Navbar = ({ isSidebarCollapsed, setIsSidebarCollapsed }) => {
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
+              className="h-6 w-6 cursor-pointer"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -279,11 +287,7 @@ const Navbar = ({ isSidebarCollapsed, setIsSidebarCollapsed }) => {
           </div>
         </div>
         <div className="flex items-center space-x-4 text-gray-700">
-          <span className="cursor-pointer">📱 App</span>
-          <span className="cursor-pointer">🇺🇸 USD</span>
-          <span className="cursor-pointer">Customer Support</span>
-          <span className="cursor-pointer">Find Bookings</span>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700">
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 cursor-pointer">
             Sign in / Register
           </button>
         </div>
