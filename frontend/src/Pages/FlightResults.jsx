@@ -334,7 +334,7 @@ export default function FlightResults() {
       >
         <div className="container mx-auto px-4">
           <div className="max-w-xl">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4 leading-tight"> {/* Adjusted heading size for mobile */}
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4 leading-tight mt-10"> {/* Adjusted heading size for mobile */}
               Find Your Next Flight
             </h1>
             <p className="text-md md:text-lg text-gray-700 mb-6"> {/* Adjusted subtitle size for mobile */}
