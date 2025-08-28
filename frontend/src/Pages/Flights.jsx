@@ -6,14 +6,11 @@ import FeatureHighlight from '../Components/Flights/FeatureHighlight';
 import FAQFlight from '../Components/Flights/FAQFlight';
 import DestinationCarousel from '../Components/Flights/DestinationCarousel';
 
-// Use the high-quality image you generated
-import heroImage from '../assets/download.png'; // UPDATE THIS PATH
+import heroImage from '../assets/download.png';
 
-// Importing more specific icons for a polished look
 import { FaPlaneDeparture, FaPlaneArrival } from 'react-icons/fa';
 import { IoCalendarOutline, IoSearch, IoSwapHorizontalOutline } from 'react-icons/io5';
 
-// A small helper component for cleaner code
 const InputIcon = ({ children }) => (
   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-700">
     {children}
@@ -23,7 +20,6 @@ const InputIcon = ({ children }) => (
 export default function Flights() {
   const navigate = useNavigate();
 
-  // States
   const [originInput, setOriginInput] = useState('');
   const [destinationInput, setDestinationInput] = useState('');
   const [originCode, setOriginCode] = useState('');
@@ -34,10 +30,14 @@ export default function Flights() {
   const [loading, setLoading] = useState(false);
   const [suggestionLoading, setSuggestionLoading] = useState(false);
   const [error, setError] = useState('');
+
   const originTimer = useRef(null);
   const destinationTimer = useRef(null);
 
-  // --- No changes to the logic ---
+  // new states to stop reopening dropdowns after selection
+  const [hasSelectedOrigin, setHasSelectedOrigin] = useState(false);
+  const [hasSelectedDestination, setHasSelectedDestination] = useState(false);
+
   const fetchCitySuggestions = async (input, setSuggestions) => {
     if (input.length < 2) {
       setSuggestions([]);
@@ -58,6 +58,7 @@ export default function Flights() {
 
   useEffect(() => {
     clearTimeout(originTimer.current);
+    if (hasSelectedOrigin) return; // stop reopening
     if (originInput.length < 2) {
       setOriginSuggestions([]);
       return;
@@ -65,10 +66,11 @@ export default function Flights() {
     originTimer.current = setTimeout(() => {
       fetchCitySuggestions(originInput, setOriginSuggestions);
     }, 500);
-  }, [originInput]);
+  }, [originInput, hasSelectedOrigin]);
 
   useEffect(() => {
     clearTimeout(destinationTimer.current);
+    if (hasSelectedDestination) return; // stop reopening
     if (destinationInput.length < 2) {
       setDestinationSuggestions([]);
       return;
@@ -76,29 +78,35 @@ export default function Flights() {
     destinationTimer.current = setTimeout(() => {
       fetchCitySuggestions(destinationInput, setDestinationSuggestions);
     }, 500);
-  }, [destinationInput]);
+  }, [destinationInput, hasSelectedDestination]);
 
   const selectOrigin = (city) => {
     setOriginInput(city.name);
     setOriginCode(city.code);
     setOriginSuggestions([]);
+    setHasSelectedOrigin(true); // prevent reopening
   };
 
   const selectDestination = (city) => {
     setDestinationInput(city.name);
     setDestinationCode(city.code);
     setDestinationSuggestions([]);
+    setHasSelectedDestination(true); // prevent reopening
   };
 
   const handleSwap = () => {
-    // Swap inputs
     const tempOriginInput = originInput;
     setOriginInput(destinationInput);
     setDestinationInput(tempOriginInput);
-    // Swap codes
+
     const tempOriginCode = originCode;
     setOriginCode(destinationCode);
     setDestinationCode(tempOriginCode);
+
+    setOriginSuggestions([]);
+    setDestinationSuggestions([]);
+    setHasSelectedOrigin(true);
+    setHasSelectedDestination(true);
   };
 
   const handleSearch = () => {
@@ -153,10 +161,13 @@ export default function Flights() {
                         type="text"
                         placeholder="From"
                         value={originInput}
-                        onChange={(e) => setOriginInput(e.target.value)}
+                        onChange={(e) => {
+                          setOriginInput(e.target.value);
+                          setHasSelectedOrigin(false); // typing again allows suggestions
+                        }}
                         className="w-full bg-transparent border-b-2 border-gray-700 pl-10 pr-3 py-2.5 focus:outline-none focus:border-blue-500 transition duration-300"
                       />
-                      {originSuggestions.length > 0 && (
+                      {!hasSelectedOrigin && originSuggestions.length > 0 && (
                         <ul className="absolute bg-white border w-full mt-1 max-h-48 overflow-y-auto z-20 shadow-lg rounded-md">
                           {originSuggestions.map((city, i) => (
                             <li key={i} className="p-2 hover:bg-blue-50 cursor-pointer" onClick={() => selectOrigin(city)}>
@@ -185,10 +196,13 @@ export default function Flights() {
                         type="text"
                         placeholder="To"
                         value={destinationInput}
-                        onChange={(e) => setDestinationInput(e.target.value)}
+                        onChange={(e) => {
+                          setDestinationInput(e.target.value);
+                          setHasSelectedDestination(false); // typing again allows suggestions
+                        }}
                         className="w-full bg-transparent border-b-2 border-gray-700 pl-10 pr-3 py-2.5 focus:outline-none focus:border-blue-500 transition duration-300"
                       />
-                      {destinationSuggestions.length > 0 && (
+                      {!hasSelectedDestination && destinationSuggestions.length > 0 && (
                         <ul className="absolute bg-white border w-full mt-1 max-h-48 overflow-y-auto z-20 shadow-lg rounded-md">
                           {destinationSuggestions.map((city, i) => (
                             <li key={i} className="p-2 hover:bg-blue-50 cursor-pointer" onClick={() => selectDestination(city)}>
@@ -219,7 +233,7 @@ export default function Flights() {
                       disabled={loading}
                     >
                       {loading ? (
-                         <svg className="animate-spin h-6 w-6 text-white" fill="none" viewBox="to right, rgba(255, 255, 255, 0.85) 10%, rgba(255, 255, 255, 0) 70%"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                          <svg className="animate-spin h-6 w-6 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                       ) : (
                         <IoSearch size={24} />
                       )}
@@ -230,12 +244,11 @@ export default function Flights() {
                 </div>
               </div>
             </div>
-            <div className="hidden md:block"></div> {/* Right side spacer */}
+            <div className="hidden md:block"></div>
           </div>
         </div>
       </div>
 
-      {/* Other sections */}
       <div className="bg-white">
         <DestinationCarousel />
         <PopularDestinations />

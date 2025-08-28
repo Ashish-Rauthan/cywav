@@ -2,25 +2,20 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import heroImage from '../assets/download.png'; // Ensure this is the correct high-quality hero image
-
 // --- ICONS (Matching the previous component's style) ---
 import { FaPlaneDeparture, FaPlaneArrival } from 'react-icons/fa';
 import { IoCalendarOutline, IoSearch } from 'react-icons/io5';
 
-
 // --- Helper Components ---
-
 const InputIcon = ({ children }) => (
   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
     {children}
   </div>
 );
-
 const FlightTimeline = ({ origin, destination, stops }) => {
   const stopDots = Array.from({ length: stops }, (_, i) => (
     <div key={i} className="w-2 h-2 bg-slate-400 rounded-full"></div>
   ));
-
   return (
     <div className="flex items-center w-full">
       <div className="flex flex-col items-center">
@@ -37,9 +32,7 @@ const FlightTimeline = ({ origin, destination, stops }) => {
     </div>
   );
 };
-
 // --- Main Data & Configuration ---
-
 const AIRLINE_NAMES = {
   SU: 'Aeroflot', EK: 'Emirates', TK: 'Turkish Airlines', LH: 'Lufthansa', BA: 'British Airways', AF: 'Air France',
   DL: 'Delta Air Lines', AA: 'American Airlines', UA: 'United Airlines', JL: 'Japan Airlines', NH: 'All Nippon Airways',
@@ -48,9 +41,8 @@ const AIRLINE_NAMES = {
   NK: 'Spirit Airlines', VY: 'Vueling', IB: 'Iberia', AY: 'Finnair', KL: 'KLM Royal Dutch Airlines', QR: 'Qatar Airways',
   EY: 'Etihad Airways', BR: 'EVA Air', CI: 'China Airlines', CA: 'Air China', MU: 'China Eastern Airlines',
   CZ: 'China Southern Airlines', KE: 'Korean Air', OZ: 'Asiana Airlines', TG: 'Thai Airways', AI: 'Air India',
-  ET: 'Ethiopian Airlines', SA: 'South African Airlines', MS: 'EgyptAir', SV: 'Saudia',
+  ET: 'Ethiopian Airlines', SA: 'South African Airways', MS: 'EgyptAir', SV: 'Saudia',
 };
-
 export default function FlightResults() {
   // Scroll to top on mount
   useEffect(() => {
@@ -59,7 +51,6 @@ export default function FlightResults() {
   
   const navigate = useNavigate();
   const location = useLocation();
-
   const [originInput, setOriginInput] = useState('');
   const [destinationInput, setDestinationInput] = useState('');
   const [originCode, setOriginCode] = useState('');
@@ -68,23 +59,24 @@ export default function FlightResults() {
   const [destinationSuggestions, setDestinationSuggestions] = useState([]);
   const [departDate, setDepartDate] = useState('');
   const [suggestionLoading, setSuggestionLoading] = useState(false);
-
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchingAlternativeDates, setSearchingAlternativeDates] = useState(false);
   const [alternativeDateSuggestions, setAlternativeDateSuggestions] = useState([]);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
-
   const [airlineFilter, setAirlineFilter] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [stopsFilter, setStopsFilter] = useState('any');
   const [sortBy, setSortBy] = useState('price');
   const [sortOrder, setSortOrder] = useState('asc');
-
   const originTimer = useRef(null);
   const destinationTimer = useRef(null);
+  
+  // FIX: Add state to control dropdown visibility
+  const [showOriginDropdown, setShowOriginDropdown] = useState(false);
+  const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
   
   // Use useCallback to memoize searchFlights function
   const searchFlights = useCallback(async (
@@ -97,12 +89,10 @@ export default function FlightResults() {
       setResults([]);
       return;
     }
-
     setLoading(true);
     setResults([]);
     setError('');
     setAlternativeDateSuggestions([]);
-
     try {
       const res = await axios.get('https://cywav.onrender.com/api/flights/search', {
         params: {
@@ -112,7 +102,6 @@ export default function FlightResults() {
           one_way: true,
         },
       });
-
       if (res.data.data?.length > 0) {
         setResults(res.data.data);
       } else {
@@ -126,16 +115,19 @@ export default function FlightResults() {
       setLoading(false);
     }
   }, []); // Empty dependency array means this function is only created once
-
+  
   // New useEffect to handle URL parameters on load and refresh
   useEffect(() => {
+    // FIX: Close dropdowns when component mounts
+    setShowOriginDropdown(false);
+    setShowDestinationDropdown(false);
+    
     const params = new URLSearchParams(location.search);
     const origin = params.get('origin');
     const destination = params.get('destination');
     const depart_date = params.get('depart_date');
     const originInput = params.get('origin_input');
     const destinationInput = params.get('destination_input');
-
     if (origin && destination && depart_date && originInput && destinationInput) {
       setOriginCode(origin);
       setDestinationCode(destination);
@@ -151,13 +143,12 @@ export default function FlightResults() {
       setDepartDate(stateDepartDate || '');
       setOriginInput(stateOriginInput || '');
       setDestinationInput(stateDestinationInput || '');
-
       if (stateOrigin && stateDestination && stateDepartDate) {
         searchFlights(stateOrigin, stateDestination, stateDepartDate);
       }
     }
   }, [location.search, location.state, searchFlights]);
-
+  
   const fetchCitySuggestions = async (input, setSuggestions) => {
     if (input.length < 2) {
       setSuggestions([]);
@@ -175,58 +166,62 @@ export default function FlightResults() {
       setSuggestionLoading(false);
     }
   };
-
+  
   useEffect(() => {
     clearTimeout(originTimer.current);
-    if (originInput.length < 2) return setOriginSuggestions([]);
+    if (originInput.length < 2) {
+      setOriginSuggestions([]);
+      return;
+    }
     originTimer.current = setTimeout(() => {
       fetchCitySuggestions(originInput, setOriginSuggestions);
     }, 500);
   }, [originInput]);
-
+  
   useEffect(() => {
     clearTimeout(destinationTimer.current);
-    if (destinationInput.length < 2) return setDestinationSuggestions([]);
+    if (destinationInput.length < 2) {
+      setDestinationSuggestions([]);
+      return;
+    }
     destinationTimer.current = setTimeout(() => {
       fetchCitySuggestions(destinationInput, setDestinationSuggestions);
     }, 500);
   }, [destinationInput]);
-
+  
   const selectOrigin = (city) => {
     setOriginInput(`${city.name}, ${city.country_name}`);
     setOriginCode(city.code);
     setOriginSuggestions([]);
+    // FIX: Close dropdown after selection
+    setShowOriginDropdown(false);
   };
-
+  
   const selectDestination = (city) => {
     setDestinationInput(`${city.name}, ${city.country_name}`);
     setDestinationCode(city.code);
     setDestinationSuggestions([]);
+    // FIX: Close dropdown after selection
+    setShowDestinationDropdown(false);
   };
-
+  
   const searchAlternativeDates = async (origin, destination, originalDate, daysToCheck = 7) => {
     setSearchingAlternativeDates(true);
     setAlternativeDateSuggestions([]);
-
     const datesToCheck = [];
     const originalDateObj = new Date(originalDate);
-
     for (let i = 1; i <= daysToCheck; i++) {
       const nextDate = new Date(originalDateObj);
       nextDate.setDate(originalDateObj.getDate() + i);
       datesToCheck.push(nextDate.toISOString().split('T')[0]);
     }
-
     for (let i = 1; i <= daysToCheck; i++) {
       const prevDate = new Date(originalDateObj);
       prevDate.setDate(originalDateObj.getDate() - i);
       datesToCheck.push(prevDate.toISOString().split('T')[0]);
     }
-
     datesToCheck.sort((a, b) => new Date(a) - new Date(b));
-
     const availableDates = [];
-
     for (const date of datesToCheck) {
       try {
         const res = await axios.get('https://cywav.onrender.com/api/flights/search', {
@@ -237,7 +232,6 @@ export default function FlightResults() {
             one_way: true,
           },
         });
-
         if (res.data.data?.length > 0) {
           availableDates.push({
             date: date,
@@ -245,19 +239,21 @@ export default function FlightResults() {
             price: Math.min(...res.data.data.map(f => f.price)),
             flightCount: res.data.data.length
           });
-
           if (availableDates.length >= 3) break;
         }
       } catch (err) {
         console.error(`Error checking date ${date}:`, err);
       }
     }
-
     setAlternativeDateSuggestions(availableDates);
     setSearchingAlternativeDates(false);
   };
   
   const handleMainSearch = () => {
+    // FIX: Close dropdowns before search
+    setShowOriginDropdown(false);
+    setShowDestinationDropdown(false);
+    
     if (originCode && destinationCode && departDate) {
       // Update URL with new search parameters
       navigate(`?origin=${originCode}&destination=${destinationCode}&depart_date=${departDate}&origin_input=${encodeURIComponent(originInput)}&destination_input=${encodeURIComponent(destinationInput)}`);
@@ -265,11 +261,11 @@ export default function FlightResults() {
       setError('Please fill in all search fields.');
     }
   };
-
+  
   const getAirlineName = (code) => {
     return AIRLINE_NAMES[code] || code || 'Unknown Airline';
   };
-
+  
   const filteredResults = results
     .map(flight => ({
       ...flight,
@@ -300,7 +296,7 @@ export default function FlightResults() {
       }
       return sortOrder === 'asc' ? compareValue : -compareValue;
     });
-
+  
   const toggleSortOrder = (field) => {
     if (sortBy === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -309,17 +305,21 @@ export default function FlightResults() {
       setSortOrder('asc');
     }
   };
-
+  
   const getSortIndicator = (field) => {
     if (sortBy !== field) return '';
     return sortOrder === 'asc' ? '↑' : '↓';
   };
-
+  
   const useAlternativeDate = (date) => {
+    // FIX: Close dropdowns before changing date
+    setShowOriginDropdown(false);
+    setShowDestinationDropdown(false);
+    
     // Update URL to trigger new search
     navigate(`?origin=${originCode}&destination=${destinationCode}&depart_date=${date}&origin_input=${encodeURIComponent(originInput)}&destination_input=${encodeURIComponent(destinationInput)}`);
   };
-
+  
   return (
     <div className="min-h-screen bg-slate-100">
       {/* === UPDATED SEARCH PANEL SECTION WITH MOBILE ADJUSTMENTS === */}
@@ -340,7 +340,6 @@ export default function FlightResults() {
             <p className="text-md md:text-lg text-gray-700 mb-6"> {/* Adjusted subtitle size for mobile */}
               Modify your travel details to find the perfect flight.
             </p>
-
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
                 {/* From */}
@@ -351,10 +350,18 @@ export default function FlightResults() {
                     placeholder="From"
                     value={originInput}
                     onChange={(e) => setOriginInput(e.target.value)}
-                    className="w-half bg-transparent border-b-2 border-gray-700 pl-10 pr-3 py-2.5 focus:outline-none focus:border-blue-500 transition duration-300"
+                    onFocus={() => {
+                      setShowOriginDropdown(true);
+                      fetchCitySuggestions(originInput, setOriginSuggestions);
+                    }}
+                    onBlur={() => {
+                      // Delay closing to allow click on suggestion
+                      setTimeout(() => setShowOriginDropdown(false), 200);
+                    }}
+                    className="w-full bg-transparent border-b-2 border-gray-700 pl-10 pr-3 py-2.5 focus:outline-none focus:border-blue-500 transition duration-300"
                   />
-                  {originSuggestions.length > 0 && (
-                    <ul className="absolute bg-white text-black border w-half mt-1 max-h-48 overflow-y-auto z-20 shadow-lg rounded-md">
+                  {showOriginDropdown && originSuggestions.length > 0 && (
+                    <ul className="absolute bg-white text-black border w-full mt-1 max-h-48 overflow-y-auto z-20 shadow-lg rounded-md">
                       {originSuggestions.map((city, i) => (
                         <li key={i} className="p-2 hover:bg-blue-50 cursor-pointer" onClick={() => selectOrigin(city)}>
                           {city.name}, {city.country_name} ({city.code})
@@ -371,10 +378,18 @@ export default function FlightResults() {
                     placeholder="To"
                     value={destinationInput}
                     onChange={(e) => setDestinationInput(e.target.value)}
-                    className="w-half bg-transparent border-b-2 border-gray-700 pl-10 pr-3 py-2.5 focus:outline-none focus:border-blue-500 transition duration-300"
+                    onFocus={() => {
+                      setShowDestinationDropdown(true);
+                      fetchCitySuggestions(destinationInput, setDestinationSuggestions);
+                    }}
+                    onBlur={() => {
+                      // Delay closing to allow click on suggestion
+                      setTimeout(() => setShowDestinationDropdown(false), 200);
+                    }}
+                    className="w-full bg-transparent border-b-2 border-gray-700 pl-10 pr-3 py-2.5 focus:outline-none focus:border-blue-500 transition duration-300"
                   />
-                  {destinationSuggestions.length > 0 && (
-                    <ul className="absolute bg-white text-black border w-half mt-1 max-h-48 overflow-y-auto z-20 shadow-lg rounded-md">
+                  {showDestinationDropdown && destinationSuggestions.length > 0 && (
+                    <ul className="absolute bg-white text-black border w-full mt-1 max-h-48 overflow-y-auto z-20 shadow-lg rounded-md">
                       {destinationSuggestions.map((city, i) => (
                         <li key={i} className="p-2 hover:bg-blue-50 cursor-pointer" onClick={() => selectDestination(city)}>
                           {city.name}, {city.country_name} ({city.code})
@@ -384,7 +399,6 @@ export default function FlightResults() {
                   )}
                 </div>
               </div>
-
               <div className="flex items-center gap-4 pt-2">
                 <div className="relative flex-grow">
                   <InputIcon><IoCalendarOutline /></InputIcon>
@@ -443,7 +457,6 @@ export default function FlightResults() {
             {isFilterVisible ? 'Hide Filters' : 'Show Filters'}
           </button>
         </div>
-
         {error && (
           <div className="mt-4 p-4 bg-red-100 border border-red-200 rounded-lg">
             <p className="text-red-600 text-center font-medium">{error}</p>
@@ -478,7 +491,6 @@ export default function FlightResults() {
             )}
           </div>
         )}
-
         {loading ? (
           <div className="text-center py-12">
             <svg className="animate-spin h-10 w-10 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -550,7 +562,6 @@ export default function FlightResults() {
                 </div>
               </div>
             </div>
-
             {/* FLIGHT RESULTS LIST */}
             <div className="lg:w-3/4 space-y-6">
               {filteredResults.length > 0 && (
@@ -558,7 +569,6 @@ export default function FlightResults() {
                   Showing {filteredResults.length} of {results.length} flights
                 </div>
               )}
-
               {filteredResults.map((flight, i) => (
                 <div
                   key={flight.link || i}
@@ -578,7 +588,6 @@ export default function FlightResults() {
                       <p className="text-sm text-slate-500">Flight {flight.flight_number || 'N/A'}</p>
                     </div>
                   </div>
-
                   {/* Middle Part: Journey Details */}
                   <div className="flex-grow p-4 md:p-6">
                     <div className="mb-4">
@@ -606,7 +615,6 @@ export default function FlightResults() {
                       </div>
                     </div>
                   </div>
-
                   {/* Right Part: Price & Booking */}
                   <div className="bg-slate-50 md:bg-white p-4 md:p-6 md:border-l border-slate-200 flex md:flex-col items-center justify-between md:justify-center gap-4 text-center">
                     <div className="mb-0 md:mb-4">
@@ -626,7 +634,6 @@ export default function FlightResults() {
                   </div>
                 </div>
               ))}
-
               {filteredResults.length === 0 && results.length > 0 && !loading && (
                 <div className="mt-8 text-center py-12 bg-white/60 backdrop-blur-lg rounded-xl shadow-lg">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
