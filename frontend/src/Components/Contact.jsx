@@ -26,7 +26,7 @@ const ContactUs = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post('/api/contact', formData);
+      const response = await axios.post('https://cywav.onrender.com/api/contact', formData);
 
       if (response.status === 200) {
         setSubmitStatus({ success: true, message: '✅ Message sent successfully!' });
