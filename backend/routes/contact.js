@@ -1,4 +1,4 @@
-// In routes/contact.js
+// In your Express server (e.g., routes/contact.js)
 const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
@@ -15,7 +15,7 @@ router.post('/contact', async (req, res) => {
         pass: process.env.EMAIL_PASS  // Your email password or app password
       }
     });
-    
+
     // Setup email data
     let mailOptions = {
       from: `"${name}" <${email}>`, // Sender address
@@ -24,7 +24,7 @@ router.post('/contact', async (req, res) => {
       text: message,
       html: `<p>${message}</p>`
     };
-    
+
     // Send mail with defined transport object
     await transporter.sendMail(mailOptions);
     
@@ -35,5 +35,4 @@ router.post('/contact', async (req, res) => {
   }
 });
 
-// Change this line:
-export default router;
+module.exports = router;

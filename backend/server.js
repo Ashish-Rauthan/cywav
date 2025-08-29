@@ -1,12 +1,14 @@
+// In server.js
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import flightRoutes from "./routes/flightRoutes.js";
-import contactRoutes from './routes/contact.js';
 
-const PORT=process.env.PORT
+// Change this line:
+const contactRoutes = require('./routes/contact.js');
 
+const PORT = process.env.PORT;
 dotenv.config();
 const app = express();
 
@@ -20,7 +22,6 @@ app.use(express.json());
 // Routes
 app.use("/api/flights", flightRoutes);
 app.use('/api', contactRoutes);
-
 
 // Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
