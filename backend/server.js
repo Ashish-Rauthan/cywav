@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import flightRoutes from "./routes/flightRoutes.js";
+const contactRoutes = require('./routes/contact.js');
+
 const PORT=process.env.PORT
 
 dotenv.config();
@@ -17,6 +19,8 @@ app.use(express.json());
 
 // Routes
 app.use("/api/flights", flightRoutes);
+app.use('/api', contactRoutes);
+
 
 // Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })

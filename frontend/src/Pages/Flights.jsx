@@ -12,7 +12,7 @@ import { FaPlaneDeparture, FaPlaneArrival } from 'react-icons/fa';
 import { IoCalendarOutline, IoSearch, IoSwapHorizontalOutline } from 'react-icons/io5';
 
 const InputIcon = ({ children }) => (
-  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-700">
+  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-black">
     {children}
   </div>
 );
@@ -151,6 +151,7 @@ export default function Flights() {
                   Your next adventure is just a search away.
                 </p>
 
+                <div className="bg-white/80 p-12 rounded-[1.5rem] shadow-lg ">
                 <div className="space-y-4">
                   {/* Row 1: From / To */}
                   <div className="grid grid-cols-11 gap-2 items-center">
@@ -243,6 +244,7 @@ export default function Flights() {
                   {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
                 </div>
               </div>
+            </div>
             </div>
             <div className="hidden md:block"></div>
           </div>
