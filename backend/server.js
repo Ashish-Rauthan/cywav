@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import flightRoutes from "./routes/flightRoutes.js";
-const contactRoutes = require('./routes/contact.js');
+import contactRoutes from './routes/contact.js';
 
 const PORT=process.env.PORT
 
