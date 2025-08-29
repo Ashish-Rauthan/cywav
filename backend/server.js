@@ -19,7 +19,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/flights", flightRoutes);
-app.use('/api', contactRoutes);
+app.use('/api/contact', contactRoutes);
 
 
 // Connect to MongoDB Atlas
