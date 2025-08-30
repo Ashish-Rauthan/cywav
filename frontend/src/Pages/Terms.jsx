@@ -89,10 +89,10 @@ const TermsAndConditions = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <Helmet>
-        <title>Flight Booking Terms and Conditions | AirTravel Policies</title>
+        <title>Flight Booking Terms and Conditions | Cywav Policies</title>
         <meta name="description" content="Read our flight booking terms and conditions. Understand airline reservation policies, cancellation rules, baggage fees, and passenger obligations before booking flights." />
         <meta name="keywords" content="flight booking terms, airline conditions, flight cancellation policy, baggage rules, airline reservation terms, flight booking agreement, air travel policies, passenger rights, flight change fees, airline ticket conditions" />
-        <link rel="canonical" href="https://yourwebsite.com/terms" />
+        
       </Helmet>
 
       {/* Hero Section */}
@@ -122,59 +122,21 @@ const TermsAndConditions = () => {
         </div>
       </motion.div>
 
-      <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
+      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Navigation */}
           <motion.div
-            className="lg:w-1/4"
+            
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.7, duration: 0.5 }}
           >
-            <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24">
-              <h2 className="text-xl font-bold mb-4 text-gray-800">Quick Navigation</h2>
-              <nav>
-                <ul className="space-y-2">
-                  {sections.map((section) => (
-                    <motion.li
-                      key={section.id}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <button
-                        onClick={() => scrollToSection(section.id)}
-                        className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
-                          activeSection === section.id
-                            ? 'bg-blue-100 text-blue-700 font-medium'
-                            : 'text-gray-600 hover:bg-gray-100'
-                        }`}
-                      >
-                        {section.title}
-                      </button>
-                    </motion.li>
-                  ))}
-                </ul>
-              </nav>
-             
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-blue-100 p-3 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-800">Need help?</p>
-                    <p className="text-sm text-gray-600">1-800-FLY-HELP</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+          
           </motion.div>
 
           {/* Main Content */}
           <motion.div
-            className="lg:w-3/4"
+            className="lg:w-full"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -185,7 +147,7 @@ const TermsAndConditions = () => {
                   className="mb-8 text-lg text-gray-700"
                   variants={itemVariants}
                 >
-                  Welcome to AirTravel! These terms and conditions govern your use of our flight booking platform and services. By booking flights through our website, you agree to comply with these airline reservation terms and conditions.
+                  Welcome to Cywav! These terms and conditions govern your use of our flight booking platform and services. By booking flights through our website, you agree to comply with these airline reservation terms and conditions.
                 </motion.p>
 
                 {/* Sections */}
@@ -281,7 +243,7 @@ const TermsAndConditions = () => {
                 <motion.div variants={itemVariants} id="governing-law">
                   <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-800 pb-2 border-b-2 border-blue-500">8. Governing Law</h2>
                   <p className="mb-4 text-gray-700">
-                    These terms and conditions are governed by the laws of [Your State/Country]. Any disputes arising from your flight booking will be resolved in the courts of [Your Jurisdiction].
+                    These terms and conditions are governed by the laws of India. Any disputes arising from your flight booking will be resolved in the courts of [Your Jurisdiction].
                   </p>
                 </motion.div>
 
@@ -305,16 +267,11 @@ const TermsAndConditions = () => {
                         </svg>
                         <span className="font-medium">Email:</span>
                       </div>
-                      <a href="mailto:support@yourwebsite.com" className="text-blue-600 hover:underline">support@yourwebsite.com</a>
+                      <a href="mailto:support@yourwebsite.com" className="text-blue-600 hover:underline">info@cywav.com</a>
                     </div>
                     <div className="flex flex-col md:flex-row md:items-center gap-4 mt-3">
-                      <div className="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                        </svg>
-                        <span className="font-medium">Phone:</span>
-                      </div>
-                      <a href="tel:18003594357" className="text-blue-600 hover:underline">1-800-FLY-HELP</a>
+                      
+                    
                     </div>
                     <div className="flex flex-col md:flex-row md:items-center gap-4 mt-3">
                       <div className="flex items-center">
@@ -328,13 +285,7 @@ const TermsAndConditions = () => {
                   </div>
                 </motion.div>
 
-                <motion.div
-                  className="mt-12 pt-6 border-t border-gray-200 text-sm text-gray-600"
-                  variants={itemVariants}
-                >
-                  <p>Last updated: [Current Date]</p>
-                  <p className="mt-2">These terms and conditions constitute the entire agreement between you and AirTravel regarding your flight booking.</p>
-                </motion.div>
+               
               </div>
             </div>
           </motion.div>

@@ -9,6 +9,7 @@ const Sidebar = ({
   setIsSidebarCollapsed,
   activeTab,
   setActiveTab,
+  isMobile,
 }) => {
   const sidebarItems = [
     { name: "Flights", icon: "✈️", path: "/" },
@@ -22,19 +23,11 @@ const Sidebar = ({
   
   return (
     <>
-      {/* Overlay for sidebar when open on mobile */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity lg:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        ></div>
-      )}
-      
       {/* Sidebar */}
       <div
         className={`fixed top-0 left-0 h-full bg-white shadow-xl z-50 transition-all duration-300 transform ${
-          isSidebarCollapsed ? "w-20" : "w-64"
-        } ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
+          isMobile ? (isSidebarOpen ? "w-64" : "w-0") : (isSidebarCollapsed ? "w-20" : "w-64")
+        } ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 overflow-hidden`}
       >
         <div className="flex flex-col p-4">
           <div className="flex items-center justify-between py-4 border-b">
@@ -59,7 +52,7 @@ const Sidebar = ({
                   />
                 </svg>
               </button>
-              {!isSidebarCollapsed && (
+              {(!isSidebarCollapsed || isSidebarOpen) && (
                 <h2 className="text-xl font-bold transition-opacity duration-300">
                   Menu
                 </h2>
@@ -91,7 +84,7 @@ const Sidebar = ({
                 } transition-all duration-300`}
               >
                 <span className="text-2xl mr-4">{item.icon}</span>
-                {!isSidebarCollapsed && (
+                {(!isSidebarCollapsed || isSidebarOpen) && (
                   <span className="whitespace-nowrap transition-opacity duration-300">
                     {item.name}
                   </span>
@@ -250,6 +243,7 @@ const Navbar = ({ isSidebarCollapsed, setIsSidebarCollapsed }) => {
         setIsSidebarCollapsed={setIsSidebarCollapsed}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        isMobile={isMobile}
       />
       
       {/* Spacer for fixed desktop navbar */}
@@ -285,11 +279,6 @@ const Navbar = ({ isSidebarCollapsed, setIsSidebarCollapsed }) => {
               cywav
             </Link>
           </div>
-        </div>
-        <div className="flex items-center space-x-4 text-gray-700">
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 cursor-pointer">
-            Sign in / Register
-          </button>
         </div>
       </div>
     </>

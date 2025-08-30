@@ -33,8 +33,6 @@ const footerSections = [
       { text: 'About Cywav.com', href: '/about' },
       { text: 'Terms & Conditions', href: '/terms' },
       { text: 'Privacy Statement', href: '/privacy' }, // Updated to link to privacy policy route
-      { text: 'Accessibility Statement', href: '/privacy' },
-      { text: 'Do Not Sell My Personal Info', href: '/privacy' }
     ],
   },
   {

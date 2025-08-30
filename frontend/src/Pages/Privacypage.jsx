@@ -6,7 +6,6 @@ const PrivacyPolicy = () => {
         <div className="px-6 py-8">
           <div className="text-center mb-10">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Privacy Policy</h1>
-            <p className="text-gray-600">Last updated: January 1, 2024</p>
           </div>
           <div className="prose prose-blue max-w-none">
             {/* Introduction Section */}
@@ -141,28 +140,6 @@ const PrivacyPolicy = () => {
               </p>
             </section>
             
-            {/* Do Not Sell My Personal Info Section */}
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Do Not Sell My Personal Info</h2>
-              <p className="text-gray-700 mb-4">
-                At Cywav Travel, we respect your privacy choices. If you are a California resident, you have the right to opt out of the "sale" of your personal information as defined by the California Consumer Privacy Act (CCPA).
-              </p>
-              <p className="text-gray-700 mb-4">
-                To exercise your right to opt out, you may:
-              </p>
-              <ul className="list-disc pl-6 mb-6 text-gray-700">
-                <li>Submit a request through our online form</li>
-                <li>Email us at privacy@cywavtravel.com with the subject line "Do Not Sell My Personal Information"</li>
-                <li>Call our privacy team at (555) 123-4567</li>
-              </ul>
-              <p className="text-gray-700 mb-4">
-                Once we receive your opt-out request, we will stop selling your personal information within a reasonable time frame. Please note that you may need to provide additional information to verify your identity and process your request.
-              </p>
-              <p className="text-gray-700">
-                You may also use browser plugins or other technologies that signal your opt-out preference globally. We will make efforts to honor these signals where technically feasible.
-              </p>
-            </section>
-            
             {/* Accessibility Statement Section */}
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Accessibility Statement</h2>
@@ -186,7 +163,7 @@ const PrivacyPolicy = () => {
                 Despite our efforts to make all pages and content on Cywav Travel fully accessible, some content may not have yet been fully adapted to the strictest accessibility standards. This may be a result of not having found or identified the most appropriate technological solution.
               </p>
               <p className="text-gray-700">
-                If you are experiencing difficulty with any content on Cywav Travel or require assistance with any part of our site, please contact us at accessibility@cywavtravel.com and we will be happy to assist you.
+                If you are experiencing difficulty with any content on Cywav Travel or require assistance with any part of our site, please contact us at info@cywav.com and we will be happy to assist you.
               </p>
             </section>
             
@@ -198,11 +175,9 @@ const PrivacyPolicy = () => {
               </p>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-gray-700">
-                  <span className="font-medium">Email:</span> privacy@cywavtravel.com
+                  <span className="font-medium">Email:</span> info@cywav.com
                 </p>
-                <p className="text-gray-700 mt-2">
-                  <span className="font-medium">Mailing Address:</span> Cywav Travel Privacy Team, 123 Travel Street, Journey City, JC 12345
-                </p>
+
               </div>
             </section>
           </div>

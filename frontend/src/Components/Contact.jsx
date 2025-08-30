@@ -21,28 +21,31 @@ const ContactUs = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitting(true);
 
-    try {
-      const response = await axios.post('https://cywav.onrender.com/api/contact', formData);
+  try {
+    const response = await axios.post(
+      "https://cywav.onrender.com/api/contact",
+      formData
+    );
 
-      if (response.status === 200) {
-        setSubmitStatus({ success: true, message: '✅ Message sent successfully!' });
-        setFormData({ name: '', email: '', subject: '', message: '' });
-      } else {
-        setSubmitStatus({ success: false, message: response.data.message || '❌ Failed to send message.' });
-      }
-    } catch (error) {
-      setSubmitStatus({
-        success: false,
-        message: error.response?.data?.message || '⚠️ An error occurred. Please try again.'
-      });
-    } finally {
-      setIsSubmitting(false);
+    if (response.status === 200) {
+      setSubmitStatus({ success: true, message: "✅ Message sent successfully!" });
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } else {
+      setSubmitStatus({ success: false, message: response.data.message || "❌ Failed to send message." });
     }
-  };
+  } catch (error) {
+    setSubmitStatus({
+      success: false,
+      message: error.response?.data?.message || "⚠️ An error occurred. Please try again."
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
