@@ -5,13 +5,13 @@ import heroImage from '../assets/download.png'; // Ensure this is the correct hi
 // --- ICONS (Matching the previous component's style) ---
 import { FaPlaneDeparture, FaPlaneArrival } from 'react-icons/fa';
 import { IoCalendarOutline, IoSearch } from 'react-icons/io5';
+
 // --- Helper Components ---
 const InputIcon = ({ children }) => (
   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
     {children}
   </div>
 );
-
 const FlightTimeline = ({ origin, destination, stops }) => {
   const stopDots = Array.from({ length: stops }, (_, i) => (
     <div key={i} className="w-2 h-2 bg-slate-400 rounded-full"></div>
@@ -32,7 +32,6 @@ const FlightTimeline = ({ origin, destination, stops }) => {
     </div>
   );
 };
-
 // --- Main Data & Configuration ---
 const AIRLINE_NAMES = {
   SU: 'Aeroflot', EK: 'Emirates', TK: 'Turkish Airlines', LH: 'Lufthansa', BA: 'British Airways', AF: 'Air France',
@@ -44,7 +43,6 @@ const AIRLINE_NAMES = {
   CZ: 'China Southern Airlines', KE: 'Korean Air', OZ: 'Asiana Airlines', TG: 'Thai Airways', AI: 'Air India',
   ET: 'Ethiopian Airlines', SA: 'South African Airways', MS: 'EgyptAir', SV: 'Saudia',
 };
-
 export default function FlightResults() {
   // Scroll to top on mount
   useEffect(() => {
@@ -326,116 +324,112 @@ export default function FlightResults() {
     <div className="min-h-screen bg-slate-100">
       {/* === UPDATED SEARCH PANEL SECTION WITH MOBILE ADJUSTMENTS === */}
       <div
-        className="min-h-screen bg-cover bg-no-repeat bg-[75%_top] md:bg-center"
+        className="bg-cover bg-no-repeat bg-[75%_top] md:bg-center pt-20 pb-12 md:py-16 mb-8" // Adjusted vertical padding for mobile
         style={{
           backgroundImage: `
-            linear-gradient(to right, rgba(255, 255, 255, 0.85) 10%, rgba(255, 255, 255, 0) 70%), 
+            linear-gradient(to right, rgba(255, 255, 255, 0.95) 20%, rgba(255, 255, 255, 0) 70%),
             url(${heroImage})
           `
         }}
       >
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 min-h-screen">
-            <div className="flex flex-col justify-center py-12 md:py-24">
-              <div className="max-w-xl">
-                <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-6 leading-tight">
-                  Find Your Next Flight
-                </h1>
-                <p className="text-lg text-gray-800 mb-8">
-                  Modify your travel details to find the perfect flight.
-                </p>
-                <div className="bg-white/80 p-12 rounded-[1.5rem] shadow-lg">
-                  <div className="space-y-4">
-                    {/* Row 1: From / To */}
-                    <div className="grid grid-cols-11 gap-2 items-center">
-                      {/* From */}
-                      <div className="relative col-span-5">
-                        <InputIcon><FaPlaneDeparture /></InputIcon>
-                        <input
-                          type="text"
-                          placeholder="From"
-                          value={originInput}
-                          onChange={(e) => setOriginInput(e.target.value)}
-                          onFocus={() => {
-                            setShowOriginDropdown(true);
-                            fetchCitySuggestions(originInput, setOriginSuggestions);
-                          }}
-                          onBlur={() => {
-                            // Delay closing to allow click on suggestion
-                            setTimeout(() => setShowOriginDropdown(false), 200);
-                          }}
-                          className="w-full bg-transparent border-b-2 border-gray-700 pl-10 pr-3 py-2.5 focus:outline-none focus:border-blue-500 transition duration-300"
-                        />
-                        {showOriginDropdown && originSuggestions.length > 0 && (
-                          <ul className="absolute bg-white border w-full mt-1 max-h-48 overflow-y-auto z-20 shadow-lg rounded-md">
-                            {originSuggestions.map((city, i) => (
-                              <li key={i} className="p-2 hover:bg-blue-50 cursor-pointer" onClick={() => selectOrigin(city)}>
-                                {city.name}, {city.country_name} ({city.code})
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                      {/* To */}
-                      <div className="relative col-span-5">
-                        <InputIcon><FaPlaneArrival /></InputIcon>
-                        <input
-                          type="text"
-                          placeholder="To"
-                          value={destinationInput}
-                          onChange={(e) => setDestinationInput(e.target.value)}
-                          onFocus={() => {
-                            setShowDestinationDropdown(true);
-                            fetchCitySuggestions(destinationInput, setDestinationSuggestions);
-                          }}
-                          onBlur={() => {
-                            // Delay closing to allow click on suggestion
-                            setTimeout(() => setShowDestinationDropdown(false), 200);
-                          }}
-                          className="w-full bg-transparent border-b-2 border-gray-700 pl-10 pr-3 py-2.5 focus:outline-none focus:border-blue-500 transition duration-300"
-                        />
-                        {showDestinationDropdown && destinationSuggestions.length > 0 && (
-                          <ul className="absolute bg-white border w-full mt-1 max-h-48 overflow-y-auto z-20 shadow-lg rounded-md">
-                            {destinationSuggestions.map((city, i) => (
-                              <li key={i} className="p-2 hover:bg-blue-50 cursor-pointer" onClick={() => selectDestination(city)}>
-                                {city.name}, {city.country_name} ({city.code})
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    </div>
-                    {/* Row 2: Date / Search */}
-                    <div className="flex items-center gap-4">
-                      <div className="relative flex-grow">
-                        <InputIcon><IoCalendarOutline /></InputIcon>
-                        <input
-                          type="date"
-                          value={departDate}
-                          onChange={(e) => setDepartDate(e.target.value)}
-                          className={`w-full appearance-none bg-transparent border-b-2 border-gray-700 pl-10 pr-3 py-2.5 focus:outline-none focus:border-blue-500 transition duration-300 ${
-                            departDate ? 'text-gray-800' : 'text-gray-500'
-                          }`}
-                        />
-                      </div>
-                      <button
-                        onClick={handleMainSearch}
-                        className="bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                        disabled={loading}
-                      >
-                        {loading ? (
-                            <svg className="animate-spin h-6 w-6 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                        ) : (
-                          <IoSearch size={24} />
-                        )}
-                      </button>
-                    </div>
-                    {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-                  </div>
+          <div className="max-w-xl">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4 leading-tight mt-10"> {/* Adjusted heading size for mobile */}
+              Find Your Next Flight
+            </h1>
+            <p className="text-md md:text-lg text-gray-700 mb-6"> {/* Adjusted subtitle size for mobile */}
+              Modify your travel details to find the perfect flight.
+            </p>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+                {/* From */}
+                <div className="relative">
+                  <InputIcon><FaPlaneDeparture /></InputIcon>
+                  <input
+                    type="text"
+                    placeholder="From"
+                    value={originInput}
+                    onChange={(e) => setOriginInput(e.target.value)}
+                    onFocus={() => {
+                      setShowOriginDropdown(true);
+                      fetchCitySuggestions(originInput, setOriginSuggestions);
+                    }}
+                    onBlur={() => {
+                      // Delay closing to allow click on suggestion
+                      setTimeout(() => setShowOriginDropdown(false), 200);
+                    }}
+                    className="w-full bg-transparent border-b-2 border-gray-700 pl-10 pr-3 py-2.5 focus:outline-none focus:border-blue-500 transition duration-300"
+                  />
+                  {showOriginDropdown && originSuggestions.length > 0 && (
+                    <ul className="absolute bg-white text-black border w-full mt-1 max-h-48 overflow-y-auto z-20 shadow-lg rounded-md">
+                      {originSuggestions.map((city, i) => (
+                        <li key={i} className="p-2 hover:bg-blue-50 cursor-pointer" onClick={() => selectOrigin(city)}>
+                          {city.name}, {city.country_name} ({city.code})
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                {/* To */}
+                <div className="relative">
+                  <InputIcon><FaPlaneArrival /></InputIcon>
+                  <input
+                    type="text"
+                    placeholder="To"
+                    value={destinationInput}
+                    onChange={(e) => setDestinationInput(e.target.value)}
+                    onFocus={() => {
+                      setShowDestinationDropdown(true);
+                      fetchCitySuggestions(destinationInput, setDestinationSuggestions);
+                    }}
+                    onBlur={() => {
+                      // Delay closing to allow click on suggestion
+                      setTimeout(() => setShowDestinationDropdown(false), 200);
+                    }}
+                    className="w-full bg-transparent border-b-2 border-gray-700 pl-10 pr-3 py-2.5 focus:outline-none focus:border-blue-500 transition duration-300"
+                  />
+                  {showDestinationDropdown && destinationSuggestions.length > 0 && (
+                    <ul className="absolute bg-white text-black border w-full mt-1 max-h-48 overflow-y-auto z-20 shadow-lg rounded-md">
+                      {destinationSuggestions.map((city, i) => (
+                        <li key={i} className="p-2 hover:bg-blue-50 cursor-pointer" onClick={() => selectDestination(city)}>
+                          {city.name}, {city.country_name} ({city.code})
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
+              <div className="flex items-center gap-4 pt-2">
+                <div className="relative flex-grow">
+                  <InputIcon><IoCalendarOutline /></InputIcon>
+                  <input
+                    type="date"
+                    value={departDate}
+                    onChange={(e) => setDepartDate(e.target.value)}
+                    className={`w-full appearance-none bg-transparent border-b-2 border-gray-700 pl-10 pr-3 py-2.5 focus:outline-none focus:border-blue-500 transition duration-300 ${
+                      departDate ? 'text-gray-800' : 'text-gray-500'
+                    }`}
+                  />
+                </div>
+                <button
+                  onClick={handleMainSearch}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 md:px-6 md:py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2 font-semibold" // Adjusted button padding for mobile
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                      <span className="hidden sm:inline">Searching...</span>
+                    </>
+                  ) : (
+                    <>
+                      <IoSearch size={20} />
+                      <span className="hidden sm:inline">Search Flights</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-            <div className="hidden md:block"></div>
           </div>
         </div>
       </div>

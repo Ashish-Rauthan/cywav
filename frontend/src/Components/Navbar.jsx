@@ -212,29 +212,6 @@ const Navbar = ({ isSidebarCollapsed, setIsSidebarCollapsed }) => {
         </button>
       </div>
       
-      {/* Mobile Navigation Items (only 3 items) - Hide when scrolled */}
-      <div 
-        className={`lg:hidden fixed top-16 left-0 right-0 bg-white shadow-md z-40 p-2 flex justify-around transition-transform duration-300 ${
-          isMobileMenuHidden ? '-translate-y-full' : 'translate-y-0'
-        }`}
-      >
-        {mobileNavItems.map((item) => (
-          <Link
-            key={item.name}
-            to={item.path}
-            onClick={() => setActiveTab(item.name)}
-            className={`flex flex-col items-center p-2 rounded-lg ${
-              activeTab === item.name
-                ? "text-blue-600 font-semibold"
-                : "text-gray-900"
-            }`}
-          >
-            <span className="text-xl">{item.icon}</span>
-            <span className="text-xs mt-1">{item.name}</span>
-          </Link>
-        ))}
-      </div>
-      
       {/* Sidebar Component */}
       <Sidebar
         isSidebarOpen={isSidebarOpen}
